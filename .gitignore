@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Raw and row-level athlete data are not shareable by default.
+data/raw/
+data/processed/
+*.xlsx
+*.xls
+
+# Local manuscript/rendering artefacts.
+*.docx
+*.pdf
+manuscript/rendered*/
+
+# OS/editor files.
+.DS_Store
+Thumbs.db

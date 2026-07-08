@@ -1,0 +1,29 @@
+{
+  "g1_rows": 1564,
+  "g1_athletes": 502,
+  "g1_date_min": "1997-07-02",
+  "g1_date_max": "2020-01-23",
+  "g1_sex_counts": {
+    "Masculino": 884,
+    "Femenino": 680
+  },
+  "g1_event_counts": {
+    "MARTILLO": 419,
+    "DISCO": 397,
+    "PESO": 383,
+    "JABALINA": 365
+  },
+  "g1_category_counts": {
+    "U18": 773,
+    "U16": 465,
+    "U20": 318,
+    "U14": 6,
+    "U23": 2
+  },
+  "athletes_with_2plus": 297,
+  "athletes_with_3plus": 196,
+  "athletes_with_5plus": 100,
+  "g2_rows": 325,
+  "g2_athletes": 91,
+  "g2_equals_g3": true
+}
