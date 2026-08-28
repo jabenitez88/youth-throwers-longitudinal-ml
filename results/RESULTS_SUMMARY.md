@@ -13,20 +13,20 @@
 
 ```text
      outcome feature_set              model  n_rows  positive_rate  auc_mean  auc_ci_low  auc_ci_high  auc_sd  balanced_accuracy_mean  balanced_accuracy_ci_low  balanced_accuracy_ci_high  f1_mean  f1_ci_low  f1_ci_high
-future_ge900  g1_current       RandomForest     289          0.273     0.866       0.812        0.920   0.055                   0.813                     0.767                      0.859    0.714      0.650       0.778
-future_ge950  g1_current LogisticRegression     289          0.142     0.862       0.815        0.908   0.047                   0.771                     0.738                      0.804    0.495      0.460       0.530
-improve_ge50  g1_current LogisticRegression     289          0.391     0.775       0.735        0.815   0.041                   0.702                     0.659                      0.745    0.651      0.603       0.699
+future_ge900  g1_current       RandomForest     289          0.273     0.866       0.790        0.942   0.055                   0.813                     0.747                      0.878    0.714      0.624       0.805
+future_ge950  g1_current LogisticRegression     289          0.142     0.862       0.796        0.927   0.047                   0.771                     0.725                      0.817    0.495      0.446       0.545
+improve_ge50  g1_current LogisticRegression     289          0.391     0.775       0.719        0.832   0.041                   0.702                     0.641                      0.763    0.651      0.583       0.719
 ```
 
 ## Best future next-observation regression models
 
 ```text
                analysis                feature_set        model  n_rows  n_athletes      target  r2_mean  r2_ci_low  r2_ci_high  r2_sd  mae_mean  mae_ci_low  mae_ci_high  rmse_mean  rmse_ci_low  rmse_ci_high
-future_next_observation context_current_implements RandomForest    1034         289 next_points    0.635      0.515       0.756  0.123    40.500      35.708       45.292     68.365       58.425        78.304
-future_next_observation            context_current RandomForest    1034         289 next_points    0.633      0.514       0.753  0.122    40.158      35.411       44.906     68.570       58.937        78.203
-future_next_observation                 g1_current RandomForest    1034         289 next_points    0.633      0.508       0.757  0.127    41.336      36.664       46.008     68.532       58.397        78.668
-future_next_observation         broader_g1_current RandomForest    1034         289 next_points    0.633      0.508       0.758  0.127    41.379      36.606       46.153     68.551       58.445        78.658
-future_next_observation            context_current        Ridge    1034         289 next_points    0.629      0.462       0.797  0.171    43.168      37.167       49.169     68.094       54.786        81.401
+future_next_observation context_current_implements RandomForest    1034         289 next_points    0.635      0.461       0.810  0.126    41.737      35.298       48.177     68.294       54.188        82.399
+future_next_observation            context_current RandomForest    1034         289 next_points    0.635      0.457       0.813  0.128    41.153      33.840       48.466     68.250       53.898        82.601
+future_next_observation            context_current        Ridge    1034         289 next_points    0.631      0.393       0.870  0.172    43.138      34.582       51.695     67.886       48.844        86.929
+future_next_observation context_current_implements        Ridge    1034         289 next_points    0.629      0.390       0.869  0.172    43.357      34.576       52.137     68.083       48.999        87.168
+future_next_observation         broader_g1_current RandomForest    1034         289 next_points    0.629      0.448       0.809  0.130    43.163      36.518       49.808     68.884       54.408        83.360
 ```
 
 ## Chronological holdout for high performance (future_ge900)

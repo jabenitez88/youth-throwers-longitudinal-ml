@@ -1,0 +1,30 @@
+{
+  "rows": 1564,
+  "athletes": 502,
+  "exact_duplicate_rows": 0,
+  "athlete_date_groups_with_multiple_rows": 7,
+  "rows_in_repeated_athlete_dates": 14,
+  "missing_by_column": {
+    "Atleta": 0,
+    "Nacimiento": 0,
+    "Comienzo": 0,
+    "PUNTOS": 0,
+    "Dorsal": 0,
+    "Salto Vertical": 0,
+    "Longitud PJ": 0,
+    "Triple PJ": 0,
+    "Edad": 0,
+    "Sexo": 0,
+    "Categoria": 0,
+    "Prueba": 0,
+    "BOLA": 14,
+    "ARTEFACTO": 0,
+    "30ml": 412,
+    "Flexibilidad": 619,
+    "Talla": 560,
+    "Peso": 560,
+    "Envergadura": 647
+  },
+  "identifier_normalization": "trim whitespace, collapse internal whitespace, uppercase name, append date of birth",
+  "fuzzy_name_matching": false
+}
