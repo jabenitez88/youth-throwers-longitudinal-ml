@@ -30,7 +30,7 @@
 
 ## Abstract
 
-Machine learning is increasingly used for sport talent development, but repeated athlete observations can inflate performance estimates when validation ignores longitudinal structure. This study evaluated an athlete-aware workflow for two-year performance forecasting in youth athletics throwers. A dataset of 1,564 records from 502 athletes tested between 1997 and 2020 in discus, hammer, javelin, and shot put was analysed. Longitudinal cohorts were constructed from irregular repeated observations, yielding 1,034 transitions from 289 athletes within a 730-day horizon and an athlete-level baseline cohort of 289 athletes. Models were assessed using athlete-grouped cross-validation, chronological holdout validation, incremental feature-set benchmarking, and permutation importance. Physical tests alone showed limited next-score performance (R2 = 0.213), whereas current score plus context reached R2 = 0.633 and maximum performance within 730 days reached R2 = 0.681. Classification of future high performance achieved AUC = 0.866 for score >=900 and AUC = 0.862 for score >=950. Chronological holdout validation for score >=900 achieved AUC = 0.891. Current performance appeared to act as a summary marker of competitive development, while isolated physical tests added limited incremental value.
+Machine learning is increasingly used for sport talent development, but repeated athlete observations can inflate performance estimates when validation ignores longitudinal structure. This study evaluated an athlete-aware workflow for two-year performance forecasting in youth athletics throwers. A dataset of 1,564 records from 502 athletes tested between 1997 and 2020 in discus, hammer, javelin, and shot put was analysed. Longitudinal cohorts were constructed from irregular repeated observations, yielding 1,034 transitions from 289 athletes within a 730-day horizon and an athlete-level baseline cohort of 289 athletes. Models were assessed using athlete-grouped cross-validation, strict chronological holdout validation, paired incremental feature-set benchmarking, calibration analysis, and permutation importance. The observed follow-up interval was excluded from all corrected predictor sets. Physical tests alone showed limited next-score performance (R2 = 0.213), whereas current score plus context reached R2 = 0.635 and maximum performance within 730 days reached R2 = 0.616. Classification of future high performance achieved ROC-AUC = 0.866 for score >=900 and ROC-AUC = 0.862 for score >=950. Strict chronological holdout validation for score >=900 achieved ROC-AUC = 0.892. Current performance appeared to act as a summary marker of competitive development, while the incremental value of isolated physical tests was generally small and varied by outcome and algorithm.
 
 **Keywords:** athletics; talent development; machine learning; longitudinal modelling; prediction; validation
 
@@ -60,7 +60,7 @@ Therefore, the aims of this study were: (i) to evaluate whether future performan
 
 This was a retrospective longitudinal modelling study using repeated performance and physical testing records from youth athletics throwers. The analysis was designed to emulate a future decision-support problem: given an athlete's available information at a baseline testing session, can subsequent performance development within approximately two years be predicted?
 
-The computational workflow was implemented as a reproducible Python pipeline (`src/run_longitudinal_ml.py`). The pipeline imports the raw spreadsheet files, standardises labels, constructs longitudinal cohorts, evaluates machine learning models, exports metrics, and generates figures. This allowed all reported tables and figures to be regenerated from the same code path.
+The computational workflow was implemented as two reproducible Python pipelines (`src/run_longitudinal_ml.py` and `src/run_major_revision_analyses.py`). They import the raw spreadsheets, standardise labels, construct longitudinal cohorts, evaluate models, and export aggregate metrics and figures.
 
 ### 2.2 Data source and participants
 
@@ -77,7 +77,7 @@ The main physical test variables were:
 - standing long jump (`Longitud PJ`);
 - standing triple jump (`Triple PJ`).
 
-Contextual variables were age, sex, age category, throwing event, medicine ball weight, and implement weight. Current performance score (`PUNTOS`) was included in future-prediction feature sets because any deployable athlete-monitoring model would normally know the athlete's current competitive level at the time of prediction.
+Contextual variables were age, sex, age category, throwing event, medicine ball weight, and implement weight. Current performance score (`PUNTOS`) was included in designated future-prediction feature sets. **TODO-METHODS-PUNTOS:** Confirm from the original records that each score was achieved and available on or before the index assessment date; the spreadsheet contains the seasonal personal-best score but not its exact competition date. Until confirmed, this timing claim must not be stated as established.
 
 Additional variables with lower completeness, including 30 m sprint, flexibility, height, body mass, and arm span, were tested in broader feature sets as sensitivity analyses.
 
@@ -94,13 +94,13 @@ Three athlete-level classification outcomes were defined using the first eligibl
 2. `future_ge900`: maximum future score of at least 900 points within 730 days;
 3. `future_ge950`: maximum future score of at least 950 points within 730 days.
 
-The 730-day horizon was selected to capture medium-term development while retaining a sufficient number of repeated observations. The baseline athlete-level cohort contained 289 athletes. The next-observation transition cohort contained 1,034 transitions from 289 athletes.
+The 730-day horizon was selected a priori to represent approximately two annual training and competition cycles while retaining sufficient repeated observations for athlete-grouped validation. The baseline athlete-level cohort contained 289 athletes. The next-observation transition cohort contained 1,034 transitions from 289 athletes.
 
-### 2.5 Leakage-aware cohort construction
+### 2.5 Athlete-aware cohort construction
 
 Athlete identity was constructed from athlete name and date of birth. Records were sorted by athlete and date. For the next-observation cohort, each record was paired with the immediately subsequent observation from the same athlete if it occurred within 730 days. For the horizon-maximum cohort, each eligible record was paired with the maximum performance score observed within the subsequent 730 days. For the athlete-level baseline cohort, only the first eligible record per athlete was retained.
 
-This procedure prevented future information from entering baseline predictors and avoided treating repeated observations from the same athlete as independent observations during model evaluation.
+The subsequently observed interval (`delta_days`) was retained only as an outcome-timing descriptor and was excluded from every corrected predictor matrix. Follow-up count and observed follow-up span were likewise not used as predictors. Grouped validation prevented records from the same athlete appearing in both training and validation folds.
 
 ### 2.6 Machine learning models and preprocessing
 
@@ -111,7 +111,7 @@ All models were embedded in preprocessing pipelines. Numeric predictors were imp
 Feature sets were compared incrementally:
 
 1. physical tests without current score;
-2. current score and prediction horizon;
+2. current score only;
 3. current score plus contextual variables;
 4. current score plus context and implement variables;
 5. current score plus context and physical tests;
@@ -121,15 +121,15 @@ Feature sets were compared incrementally:
 
 Repeated-observation regression models were evaluated using five-fold grouped cross-validation by athlete. This ensured that records from the same athlete did not appear in both training and test folds.
 
-Classification models on the one-row-per-athlete baseline cohort were evaluated using stratified cross-validation. In addition, the `future_ge900` classification task was tested with a chronological holdout. Baseline observations up to 27 October 2012 were used for training, and later observations were reserved for testing. This split was intended to approximate future deployment more closely than random partitioning.
+Classification models on the one-row-per-athlete baseline cohort were evaluated using five-fold stratified cross-validation, generated separately for each outcome with shuffling and `random_state=42`. The same folds were reused across algorithms and feature sets. For strict chronological validation, 27 October 2012 (the 70th percentile of baseline dates) defined the start of the later holdout. Training index dates were restricted to 28 October 2010 or earlier so that their full 730-day outcome windows ended before the holdout baseline period. This yielded 168 training and 82 test athletes with no athlete overlap.
 
 ### 2.8 Statistical analysis and performance metrics
 
-Regression performance was quantified using coefficient of determination (R2), mean absolute error (MAE), and root mean squared error (RMSE). Classification performance was quantified using area under the receiver operating characteristic curve (AUC), balanced accuracy, and F1 score. Fold-level 95% confidence intervals were calculated from cross-validation fold estimates as descriptive indicators of metric stability.
+Regression performance was quantified using coefficient of determination (R2), mean absolute error (MAE), and root mean squared error (RMSE). Classification performance was quantified using ROC-AUC, precision-recall AUC (PR-AUC), balanced accuracy, F1 score, Brier score, calibration intercept, and calibration slope. Fold-level descriptive 95% t intervals were calculated as mean +/- t(0.975, df=4) x SD/sqrt(5). Paired incremental effects were calculated from identical out-of-fold observations and summarized with 2,000-replicate percentile bootstrap intervals, clustered by athlete for repeated-record regression.
 
 Permutation importance was estimated for the `future_ge900` classification task using mean decrease in ROC AUC after shuffling each predictor. This model-agnostic analysis was used to evaluate the relative contribution of current score, contextual variables, and physical tests.
 
-All analyses were conducted in Python using scikit-learn. The complete analysis script exported processed cohorts, summary tables, and manuscript-ready figures.
+All analyses used Python 3.12.13, NumPy 1.26.4, pandas 2.2.3, SciPy 1.13.1, scikit-learn 1.9.0, and Matplotlib 3.9.2. Hyperparameters were fixed in advance; no grid search, randomized search, nested cross-validation, or post-comparison tuning was performed.
 
 ## 3. Results
 
@@ -147,19 +147,19 @@ These values were lower than estimates from random row-level splitting in prelim
 
 ### 3.3 Future continuous performance prediction
 
-The incremental feature-set comparison showed a clear separation between models based only on physical tests and models that included current competitive performance. Physical tests without current score achieved R2 = 0.213 (95% CI: 0.098 to 0.327), MAE = 80.35 (95% CI: 75.76 to 84.94), and RMSE = 101.65 (95% CI: 96.67 to 106.62) for next-observation prediction.
+The feature-set benchmark showed a clear separation between models based only on physical tests and models that included current competitive performance. Physical tests without current score achieved R2 = 0.213 (descriptive 95% interval: 0.051 to 0.375), MAE = 80.35 (73.85 to 86.85), and RMSE = 101.65 (94.60 to 108.70) for next-observation prediction.
 
-Adding current score produced a large improvement. A model using current score alone achieved R2 = 0.616 (95% CI: 0.503 to 0.730), MAE = 41.38 (95% CI: 36.96 to 45.80), and RMSE = 70.33 (95% CI: 61.53 to 79.13). Adding basic context increased performance modestly to R2 = 0.633 (95% CI: 0.514 to 0.753), MAE = 40.16 (95% CI: 35.41 to 44.91), and RMSE = 68.57 (95% CI: 58.94 to 78.20).
+Adding current score produced a large improvement. The best current-score-only model achieved R2 = 0.611, MAE = 43.49, and RMSE = 69.59. Adding basic context yielded R2 = 0.635, MAE = 41.15, and RMSE = 68.25.
 
-The best next-observation model was random forest using current score, context, and implement variables (R2 = 0.635, 95% CI: 0.515 to 0.756; MAE = 40.50, 95% CI: 35.71 to 45.29; RMSE = 68.36, 95% CI: 58.43 to 78.30). Adding physical tests resulted in similar performance (R2 = 0.633, 95% CI: 0.508 to 0.757; MAE = 41.34, 95% CI: 36.66 to 46.01; RMSE = 68.53, 95% CI: 58.40 to 78.67).
+The best next-observation benchmark was random forest using current score, context, and implement variables (R2 = 0.635; MAE = 41.74; RMSE = 68.29). In paired same-algorithm comparisons, adding physical tests produced ΔR2 values from -0.007 to 0.001 and ΔRMSE values from -0.696 to 0.086 points; every 95% bootstrap interval included zero.
 
-For maximum future score within 730 days, the best model was gradient boosting using current score, contextual variables, and physical tests (R2 = 0.681, 95% CI: 0.592 to 0.771; MAE = 44.94; RMSE = 65.23). Models using current score and contextual variables alone performed similarly, suggesting limited incremental gain from physical tests after accounting for current competitive level.
+For maximum future score within 730 days, the corrected best model was gradient boosting using current score, contextual variables, and physical tests (R2 = 0.616, descriptive 95% interval: 0.484 to 0.748; MAE = 51.31; RMSE = 71.88). Relative to the same gradient-boosting model without physical tests, the paired increment was ΔR2 = 0.040 (bootstrap 95% interval: 0.012 to 0.068) and the RMSE reduction was 3.79 points (1.16 to 6.45). Corresponding ridge and random-forest intervals included zero, indicating algorithm-dependent rather than uniform incremental value.
 
 ### 3.4 Future high-performance classification
 
-Classification models produced strong discrimination for future high-performance outcomes. For `future_ge900`, random forest using current score, context, and physical tests achieved AUC = 0.866 (95% CI: 0.812 to 0.920), balanced accuracy = 0.813, and F1 = 0.714. For `future_ge950`, logistic regression with the same feature set achieved AUC = 0.862 (95% CI: 0.815 to 0.908), balanced accuracy = 0.771, and F1 = 0.495. For `improve_ge50`, logistic regression achieved AUC = 0.775 (95% CI: 0.735 to 0.815), balanced accuracy = 0.702, and F1 = 0.651.
+Classification models produced strong discrimination for future high-performance outcomes. For `future_ge900`, random forest using current score, context, and physical tests achieved ROC-AUC = 0.866 (descriptive 95% interval: 0.790 to 0.942), PR-AUC = 0.717, Brier score = 0.138, balanced accuracy = 0.813, and F1 = 0.714. For `future_ge950`, logistic regression achieved ROC-AUC = 0.862 (0.796 to 0.927), PR-AUC = 0.628, and Brier score = 0.147. For `improve_ge50`, logistic regression achieved ROC-AUC = 0.775 (0.719 to 0.832), PR-AUC = 0.709, and Brier score = 0.197. Paired ROC-AUC increments from adding physical tests were small and all bootstrap intervals included zero.
 
-The chronological holdout analysis for `future_ge900` supported the cross-validation results. Logistic regression achieved AUC = 0.891, balanced accuracy = 0.796, and F1 = 0.765 on the later holdout set. Random forest and gradient boosting achieved AUC = 0.864 and AUC = 0.871, respectively. The holdout test set had a higher positive rate than the full baseline cohort (0.439 vs 0.273), indicating a possible temporal or cohort-composition shift that should be considered when interpreting deployment stability.
+In the strict chronological holdout for `future_ge900`, logistic regression achieved ROC-AUC = 0.892, PR-AUC = 0.873, and Brier score = 0.150; gradient boosting achieved ROC-AUC = 0.905. The holdout contained 36/82 positives versus 30/168 in training, indicating substantial temporal or cohort-composition shift. For `future_max_points`, holdout R2 ranged from 0.128 to 0.320, materially below grouped cross-validation performance.
 
 ### 3.5 Variable importance
 
@@ -175,7 +175,7 @@ The best classification models achieved AUC values of approximately 0.86 for fut
 
 The dominance of current competitive score should be interpreted carefully. The result is not simply that "current performance predicts future performance"; instead, current score appears to operate as a compact summary of the athlete's present developmental state. In youth throwers, a competition score is likely to integrate maturation, event-specific technical skill, training history, coordination under the constraints of the event, competitive experience, and adaptation to the age-appropriate implement. From this perspective, the strong contribution of current score is practically informative: isolated physical tests did not replace contextualised competitive performance when the task was longitudinal forecasting rather than same-session profiling. **TODO-DISCUSSION-1:** Add sport-specific references supporting the interpretation of current score as an integrated marker of maturation, technique, training history, and event adaptation.
 
-The feature-set comparison strengthens this interpretation. Physical tests without current score had substantially lower next-score performance (R2 = 0.213) than current score alone (R2 = 0.616). Adding context and implement characteristics produced modest gains, whereas adding physical tests to current score and context did not materially improve performance. This does not mean that physical tests are unimportant for training, monitoring, or understanding performance determinants. Rather, it suggests that, in this cohort and forecasting task, much of their predictive information may already be expressed through current competitive level, or may be too event-specific and technique-dependent to add stable incremental signal in a pooled model. **TODO-DISCUSSION-2:** Add sport-science literature explaining why strength and power tests may be useful for training prescription even when their incremental forecasting value is limited.
+The feature-set comparison strengthens this interpretation. Physical tests without current score had substantially lower next-score performance (R2 = 0.213) than current-score-anchored models (R2 approximately 0.61-0.64). In paired comparisons, physical tests did not consistently improve next-observation regression or classification, although gradient boosting showed a modest improvement for maximum future score. This does not mean that physical tests are unimportant for training, monitoring, or understanding performance determinants. Rather, it suggests that incremental forecasting value is task- and algorithm-dependent and may already be partly expressed through current competitive level. **TODO-DISCUSSION-2:** Add sport-science literature explaining why strength and power tests may be useful for training prescription even when their incremental forecasting value is limited.
 
 **TODO-DISCUSSION-3:** Add a paragraph comparing the results with previous studies on young throwers and talent identification. Be explicit about similarities and differences: previous models identify influential tests; this paper asks whether they improve future prediction under athlete-aware validation.
 
@@ -191,7 +191,7 @@ The chronological holdout analysis is also important. Although not a substitute 
 
 The main strength of this study is the longitudinal, leakage-aware formulation of a practical talent-development question. The analysis used a long-term dataset, repeated observations, grouped validation, chronological holdout testing, incremental feature-set comparison, and model-agnostic interpretability.
 
-Several limitations should be acknowledged. First, the dataset was retrospective and was not collected specifically for machine learning deployment. Second, key determinants of throwing development, including technical quality, training load, maturity status, injury history, psychological variables, and coach assessments, were not available. Third, the high-performance thresholds were operational and should be refined with domain experts; empirically, 900 and 950 points corresponded approximately to the 73rd and 86th percentiles of future maximum score in the available cohort. Fourth, missing data were uneven across variables, and variables such as maximal strength were available only in a smaller subset, raising possible availability bias and preventing robust primary inference from maximal strength tests. Fifth, external validation on a more recent or independent cohort is required before real-world implementation.
+Several limitations should be acknowledged. First, the dataset was retrospective and was not collected specifically for machine learning deployment. Second, the exact competition date underlying the seasonal personal-best score was not present in the spreadsheet; prospective interpretation of score-anchored models depends on confirming that this score was available by the index assessment. Third, follow-up was irregular: the median athlete had two future observations and 371 observed follow-up days, so non-attainment represents an observed non-case rather than guaranteed continuous surveillance. Sensitivity analyses requiring at least two or three future observations did not remove predictive signal but cannot eliminate informative censoring. Fourth, key determinants including technical quality, training load, maturity status, injury history, psychological variables, and coach assessments were unavailable. Fifth, the 900- and 950-point cutoffs were operational, corresponding approximately to the 73rd and 86th percentiles; although the points scale is designed for event comparison, threshold transportability by sex, age, event, and implement requires external validation. Sixth, external validation on a more recent or independent cohort is required before real-world implementation.
 
 ### 4.2 Practical implications
 
@@ -199,7 +199,7 @@ The results suggest that models based on current performance and basic contextua
 
 ## 5. Conclusion
 
-A leakage-aware longitudinal machine learning workflow supported two-year performance forecasting in youth athletics throwers with useful accuracy. Future high-performance classification reached AUC values around 0.86-0.89, while future score regression reached R2 values up to 0.68. Current performance, sex, age, event, and implement context were more influential than isolated physical tests. These findings support the use of athlete-aware longitudinal validation in sport performance modelling and caution against overinterpreting same-session or row-random prediction results in repeated-measure athlete datasets.
+An athlete-aware longitudinal machine learning workflow supported two-year performance forecasting in youth athletics throwers. Future high-performance classification reached ROC-AUC values around 0.86 in cross-validation, while corrected future-score regression reached R2 values up to 0.62. Physical tests added little consistent value to next-observation or classification models, although a modest algorithm-specific increment was observed for maximum future score. These findings support athlete-aware validation and calibrated decision support while cautioning against temporal leakage, irregular follow-up, and automatic selection use.
 
 ## References
 
@@ -227,37 +227,38 @@ Zuvela, F., Skoric, J., & Matijasevic, P. (2025). Influence of different strengt
 | Athlete-level baseline cohort | 289 |
 | Time span | 1997-2020 |
 
-**Table 2.** Incremental feature-set comparison for next-observation regression within 730 days. Values are grouped cross-validated estimates; confidence intervals are fold-level descriptive 95% intervals.
+**Table 2.** Paired incremental value of adding physical tests to current score and context. Positive values indicate improvement. Intervals are 2,000-replicate athlete-cluster bootstrap percentile intervals.
 
-| Feature set | Model | R2 (95% CI) | MAE (95% CI) | RMSE (95% CI) |
-|---|---|---:|---:|---:|
-| Physical tests without current score | Ridge | 0.213 (0.098-0.327) | 80.35 (75.76-84.94) | 101.65 (96.67-106.62) |
-| Current score only | Random forest | 0.616 (0.503-0.730) | 41.38 (36.96-45.80) | 70.33 (61.53-79.13) |
-| Current score + context | Random forest | 0.633 (0.514-0.753) | 40.16 (35.41-44.91) | 68.57 (58.94-78.20) |
-| Current score + context + implement | Random forest | 0.635 (0.515-0.756) | 40.50 (35.71-45.29) | 68.36 (58.43-78.30) |
-| Current score + context + physical tests | Random forest | 0.633 (0.508-0.757) | 41.34 (36.66-46.01) | 68.53 (58.40-78.67) |
+| Outcome | Algorithm | Delta R2 (95% interval) | RMSE reduction, points (95% interval) |
+|---|---|---:|---:|
+| Next observation | Ridge | -0.000 (-0.008 to 0.007) | -0.02 (-0.81 to 0.73) |
+| Next observation | Random forest | -0.007 (-0.016 to 0.002) | -0.70 (-1.62 to 0.18) |
+| Next observation | Gradient boosting | 0.001 (-0.031 to 0.035) | 0.09 (-3.04 to 3.22) |
+| Maximum within 730 days | Ridge | 0.010 (-0.006 to 0.026) | 0.97 (-0.58 to 2.57) |
+| Maximum within 730 days | Random forest | 0.006 (-0.012 to 0.025) | 0.59 (-1.17 to 2.33) |
+| Maximum within 730 days | Gradient boosting | 0.040 (0.012 to 0.068) | 3.79 (1.16 to 6.45) |
 
 **Table 3.** Best grouped cross-validated regression model for maximum future score within 730 days.
 
 | Outcome | Feature set and model | Sample | R2 (95% CI) | Error metrics |
 |---|---|---|---:|---:|
-| Maximum score <=730 days | Current + context + physical tests; gradient boosting | n=1,041; athletes=289 | 0.681 (0.592-0.771) | MAE=44.94; RMSE=65.23 |
+| Maximum score <=730 days | Current + context + physical tests; gradient boosting | n=1,041; athletes=289 | 0.616 (0.484-0.748) | MAE=51.31; RMSE=71.88 |
 
 **Table 4.** Best classification models for athlete-level future outcomes. All models used current score, context, and physical tests.
 
-| Outcome | Model | Positive rate | AUC (95% CI) | Bal. acc. | F1 |
+| Outcome | Model | Positive rate | ROC-AUC (95% interval) | PR-AUC | Brier |
 |---|---|---:|---:|---:|---:|
-| Future score >=900 | Random forest | 0.273 | 0.866 (0.812-0.920) | 0.813 | 0.714 |
-| Future score >=950 | Logistic regression | 0.142 | 0.862 (0.815-0.908) | 0.771 | 0.495 |
-| Improvement >=50 | Logistic regression | 0.391 | 0.775 (0.735-0.815) | 0.702 | 0.651 |
+| Future score >=900 | Random forest | 0.273 | 0.866 (0.790-0.942) | 0.717 | 0.138 |
+| Future score >=950 | Logistic regression | 0.142 | 0.862 (0.796-0.927) | 0.628 | 0.147 |
+| Improvement >=50 | Logistic regression | 0.391 | 0.775 (0.719-0.832) | 0.709 | 0.197 |
 
-**Table 5.** Chronological holdout validation for future score >=900 using current score, context, and physical tests. The cut-off date was 2012-10-27.
+**Table 5.** Strict chronological holdout validation for future score >=900 using current score, context, and physical tests. Training index dates ended 730 days before the 2012-10-27 holdout cutoff.
 
-| Model | Train/test n | Test positive rate | AUC | Bal. acc. | F1 |
+| Model | Train/test n | Test positive rate | ROC-AUC | PR-AUC | Brier |
 |---|---|---:|---:|---:|---:|
-| Logistic regression | 207/82 | 0.439 | 0.891 | 0.796 | 0.765 |
-| Random forest | 207/82 | 0.439 | 0.864 | 0.700 | 0.593 |
-| Gradient boosting | 207/82 | 0.439 | 0.871 | 0.768 | 0.727 |
+| Logistic regression | 168/82 | 0.439 | 0.892 | 0.873 | 0.150 |
+| Random forest | 168/82 | 0.439 | 0.860 | 0.779 | 0.200 |
+| Gradient boosting | 168/82 | 0.439 | 0.905 | 0.864 | 0.164 |
 
 **Table 6.** Operational threshold summary in the athlete-level baseline cohort.
 
@@ -285,10 +286,12 @@ Zuvela, F., Skoric, J., & Matijasevic, P. (2025). Influence of different strengt
 
 ## Figure captions
 
-**Figure 1.** Leakage-aware longitudinal cohort construction. The workflow starts from 1,564 cleaned records from 502 athletes, identifies athletes with repeated observations, constructs next-observation transitions within 730 days, and creates a one-record-per-athlete baseline cohort for classification.
+**Figure 1.** Athlete-aware longitudinal cohort construction. The workflow starts from 1,564 cleaned records from 502 athletes, identifies athletes with repeated observations, constructs next-observation transitions within 730 days, and creates a one-record-per-athlete baseline cohort for classification.
+
+**Figure 5.** Five-bin out-of-fold calibration curves for future scores >=900 and >=950, comparing current score and context with the same predictor set plus physical tests.
 
 **Figure 2.** Cross-validated AUC for future classification outcomes. Models using current score, context, and physical tests are compared with models using current score and context only.
 
 **Figure 3.** Permutation importance for future high-performance classification (`future_ge900`). Importance is expressed as mean decrease in ROC AUC after predictor permutation.
 
-**Figure 4.** Grouped cross-validated R2 for next-observation regression by feature set. The comparison highlights the contrast between physical tests without current score and current score-anchored models. All folds were grouped by athlete to avoid leakage between training and test sets.
+**Figure 4.** Paired incremental change in R2 after adding physical tests to current score, context, and implement variables within each fixed algorithm. Points are out-of-fold paired estimates and error bars are 2,000-replicate athlete-cluster bootstrap 95% percentile intervals.

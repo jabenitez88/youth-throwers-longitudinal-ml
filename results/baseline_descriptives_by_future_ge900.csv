@@ -1,0 +1,3 @@
+future_ge900,PUNTOS_count,PUNTOS_mean,PUNTOS_std,Edad_count,Edad_mean,Edad_std,Dorsal_count,Dorsal_mean,Dorsal_std,Salto Vertical_count,Salto Vertical_mean,Salto Vertical_std,Longitud PJ_count,Longitud PJ_mean,Longitud PJ_std,Triple PJ_count,Triple PJ_mean,Triple PJ_std,BOLA_count,BOLA_mean,BOLA_std,ARTEFACTO_count,ARTEFACTO_mean,ARTEFACTO_std
+0,210,747.119,87.195,210,15.467,1.156,210,13.097,2.044,210,44.06,8.625,210,2.296,0.256,210,6.724,0.877,210,3.933,0.991,210,2.23,1.621
+1,79,868.139,118.079,79,15.303,1.18,79,14.269,2.168,79,50.113,8.303,79,2.473,0.231,79,7.353,0.802,79,4.823,0.764,79,3.109,1.649

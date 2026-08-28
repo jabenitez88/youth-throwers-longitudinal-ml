@@ -13,6 +13,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy.stats import t
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import (
     GradientBoostingClassifier,
@@ -51,9 +52,10 @@ def mean_ci(values: Iterable[float]) -> tuple[float, float, float]:
     mean = float(np.nanmean(arr))
     if len(arr) <= 1:
         return mean, float("nan"), float("nan")
-    # Normal approximation is intentionally conservative/simple for reporting
-    # cross-validation fold uncertainty in a reproducible manuscript draft.
-    margin = 1.96 * float(np.nanstd(arr, ddof=1)) / np.sqrt(len(arr))
+    valid = arr[np.isfinite(arr)]
+    if len(valid) <= 1:
+        return mean, float("nan"), float("nan")
+    margin = float(t.ppf(0.975, df=len(valid) - 1)) * float(np.std(valid, ddof=1)) / np.sqrt(len(valid))
     return mean, mean - margin, mean + margin
 
 
@@ -127,7 +129,9 @@ def get_feature_sets() -> FeatureSets:
         g2_strength=["Cargada", "Pectoral", "Sentadilla"],
         context=["Edad", "Sexo", "Categoria", "Prueba", "BOLA", "ARTEFACTO"],
         broader=["30ml", "Flexibilidad", "Talla", "Peso", "Envergadura"],
-        current_anchor=["PUNTOS", "delta_days"],
+        # Only information available at the index assessment is permitted.
+        # delta_days describes the subsequently observed follow-up and is not a predictor.
+        current_anchor=["PUNTOS"],
     )
 
 
@@ -167,6 +171,8 @@ def build_horizon_max_cohort(df: pd.DataFrame, horizon_days: int) -> pd.DataFram
             row["future_delta_points"] = row["future_max_points"] - row["PUNTOS"]
             row["n_future_observations"] = len(future)
             row["delta_days"] = int((future.loc[best_idx, "Comienzo"] - row["Comienzo"]).days)
+            row["last_future_date"] = future["Comienzo"].max()
+            row["observed_followup_days"] = int((row["last_future_date"] - row["Comienzo"]).days)
             rows.append(row)
     return pd.DataFrame(rows)
 
@@ -193,6 +199,8 @@ def build_baseline_cohort(df: pd.DataFrame, horizon_days: int, g1_tests: list[st
             row["future_delta_points"] = row["future_max_points"] - row["PUNTOS"]
             row["n_future_observations"] = len(future)
             row["delta_days"] = int((future.loc[best_idx, "Comienzo"] - row["Comienzo"]).days)
+            row["last_future_date"] = future["Comienzo"].max()
+            row["observed_followup_days"] = int((row["last_future_date"] - row["Comienzo"]).days)
             rows.append(row)
             break
     return pd.DataFrame(rows)
@@ -536,7 +544,7 @@ def plot_cohort_flow(summary: dict, next_cohort: pd.DataFrame, baseline: pd.Data
                 xytext=(x + 0.105, 0.48),
                 arrowprops=dict(arrowstyle="->", lw=1.4, color="#1F4E79"),
             )
-    ax.set_title("Leakage-aware longitudinal cohort construction", fontsize=13, fontweight="bold")
+    ax.set_title("Athlete-aware longitudinal cohort construction", fontsize=13, fontweight="bold")
     ax.set_xlim(0, 1)
     ax.set_ylim(0.20, 0.78)
     fig.tight_layout()
@@ -550,7 +558,7 @@ def pretty_label(label: str) -> str:
         "g1_current": "Context + current score\n+ physical tests",
         "g1_tests_only": "Physical tests\nonly",
         "context_g1_no_current": "Context +\nphysical tests",
-        "current_only": "Current score\n+ horizon",
+        "current_only": "Current score",
         "context_current_implements": "Current + context\n+ implement",
         "broader_g1_current": "Current + context + tests\n+ broad features",
         "future_ge900": "Future score >= 900",
@@ -879,7 +887,6 @@ def main() -> None:
     plot_cohort_flow(summary, next_cohort, baseline)
     plot_classification_auc(cls)
     plot_permutation_importance(importance)
-    plot_regression_results(future_reg)
 
     write_summary(summary, current_reg, future_reg, cls, temporal, importance, threshold_summary)
     print(f"Wrote results to {RESULTS_DIR}")

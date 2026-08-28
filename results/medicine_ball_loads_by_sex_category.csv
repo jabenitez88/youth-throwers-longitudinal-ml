@@ -1,0 +1,9 @@
+sex,category,n,n_with_recorded_load,load_kg_min,load_kg_max,load_kg_mode,observed_loads_kg
+Femenino,U14,2,2,4.0,4.0,4.0,4.0
+Femenino,U16,71,71,3.0,4.0,3.0,3.0;4.0
+Femenino,U18,47,47,3.0,4.0,3.0,3.0;4.0
+Femenino,U20,9,9,3.0,4.0,4.0,3.0;4.0
+Masculino,U14,2,2,4.0,4.0,4.0,4.0
+Masculino,U16,89,89,4.0,5.0,5.0,4.0;5.0
+Masculino,U18,60,60,5.0,6.0,5.0,5.0;6.0
+Masculino,U20,9,9,6.0,6.0,6.0,6.0

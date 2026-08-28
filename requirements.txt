@@ -1,5 +1,6 @@
-pandas
-numpy
-scikit-learn
-matplotlib
-openpyxl
+numpy==1.26.4
+pandas==2.2.3
+scipy==1.13.1
+scikit-learn==1.9.0
+matplotlib==3.9.2
+openpyxl==3.1.5
