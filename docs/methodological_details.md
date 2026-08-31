@@ -169,6 +169,22 @@ Out-of-fold performance was also summarized for calendar periods 1997-2005,
 2006-2012, and 2013-2020. These are sensitivity summaries rather than independent
 external validations.
 
+For the repeated-instance `future_max_points` cohort, follow-up sensitivity was
+defined at the index-instance level. An instance was retained only when its 730-day
+window contained at least two or at least three strictly later records. Each restricted
+cohort was re-evaluated using five-fold `GroupKFold` by athlete, the same preprocessing,
+fixed hyperparameters, and predictor sets as the primary analysis. The paired comparison
+between `context_current_implements` and `g1_current` used 2,000 athlete-cluster
+bootstrap replicates. Follow-up count remained an eligibility restriction only and was
+never entered as a predictor.
+
+The at-least-two restriction yielded 737 prediction instances from 185 athletes; the
+at-least-three restriction yielded 524 instances from 128 athletes. Detailed fold,
+aggregate-model, and paired-increment results are available in
+`future_max_followup_sensitivity_fold_metrics.csv`,
+`future_max_followup_sensitivity_models.csv`, and
+`future_max_followup_sensitivity_incremental.csv`.
+
 ## Permutation importance
 
 Permutation importance for `future_ge900` was calculated only on held-out

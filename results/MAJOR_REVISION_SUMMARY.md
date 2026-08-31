@@ -65,4 +65,24 @@ classification      future_ge950   GradientBoosting  g1_current    NaN     NaN  
                            4          71    24.57                     42                     27
 ```
 
+## Future-maximum regression by minimum follow-up exposure
+
+Gradient boosting with current score, context, implements, and physical tests:
+
+```text
+ minimum_future_observations  n_instances  n_unique_athletes                analysis            target            model feature_set  n_rows  n_athletes  r2_fold_mean  r2_fold_ci_low  r2_fold_ci_high  r2_oof  mae_fold_mean  mae_fold_ci_low  mae_fold_ci_high  mae_oof  rmse_fold_mean  rmse_fold_ci_low  rmse_fold_ci_high  rmse_oof
+                           1         1041                289 future_horizon_max_min1 future_max_points GradientBoosting  g1_current    1041         289        0.6160          0.4839           0.7482  0.6290        51.3097          37.8982           64.7211  51.3059         71.8846           56.7800            86.9893   72.6971
+                           2          737                185 future_horizon_max_min2 future_max_points GradientBoosting  g1_current     737         185        0.5003          0.2949           0.7057  0.5595        54.9447          43.2827           66.6067  54.9348         74.5783           61.9921            87.1646   75.1159
+                           3          524                128 future_horizon_max_min3 future_max_points GradientBoosting  g1_current     524         128        0.5261          0.2628           0.7895  0.5606        55.2896          41.0919           69.4873  55.2539         70.7051           52.2189            89.1913   71.9032
+```
+
+Paired gradient-boosting increment after adding physical tests:
+
+```text
+ minimum_future_observations  n_instances  n_unique_athletes                analysis            target            model     without_physical_tests with_physical_tests  n_rows  n_athletes  bootstrap_replicates  delta_r2  delta_r2_ci_low  delta_r2_ci_high  delta_mae  delta_mae_ci_low  delta_mae_ci_high  delta_rmse  delta_rmse_ci_low  delta_rmse_ci_high
+                           1         1041                289 future_horizon_max_min1 future_max_points GradientBoosting context_current_implements          g1_current    1041         289                  2000    0.0397           0.0124            0.0681     2.0682            0.1085             4.0351      3.7903             1.1553              6.4489
+                           2          737                185 future_horizon_max_min2 future_max_points GradientBoosting context_current_implements          g1_current     737         185                  2000   -0.0148          -0.0616            0.0241    -0.5828           -3.0537             2.0806     -1.2769            -4.8453              2.1054
+                           3          524                128 future_horizon_max_min3 future_max_points GradientBoosting context_current_implements          g1_current     524         128                  2000   -0.0072          -0.0459            0.0271    -1.7214           -4.5362             1.0169     -0.5919            -3.5417              2.2701
+```
+
 Cross-validation intervals are descriptive t intervals across the five fixed folds; they are not inferential confidence intervals.

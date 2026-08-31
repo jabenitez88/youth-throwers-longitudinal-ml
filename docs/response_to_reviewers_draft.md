@@ -35,6 +35,24 @@ The manuscript now describes threshold non-attainment as an observed non-case an
 acknowledges possible informative censoring rather than implying complete continuous
 surveillance.
 
+We additionally repeated the continuous `future_max_points` analysis after restricting
+each index instance to windows containing at least two or at least three subsequent
+observations. Five-fold athlete-grouped cross-validation and the original fixed
+hyperparameters were retained. With at least two future observations, the cohort
+contained 737 instances from 185 athletes; gradient boosting with physical tests
+achieved R2 = 0.500, MAE = 54.94, and RMSE = 74.58. With at least three future
+observations, 524 instances from 128 athletes remained; corresponding values were
+R2 = 0.526, MAE = 55.29, and RMSE = 70.71.
+
+The paired gradient-boosting increment from physical tests did not persist in these
+restricted cohorts. Delta R2 was -0.015 (95% athlete-cluster bootstrap interval -0.062
+to 0.024) with at least two future observations and -0.007 (-0.046 to 0.027) with at
+least three. RMSE reduction was -1.28 points (-4.85 to 2.11) and -0.59 points (-3.54
+to 2.27), respectively; negative values indicate worse performance after adding the
+tests. We have therefore revised the interpretation: `future_max_points` prediction
+remained moderate under greater observed follow-up exposure, but the small physical-test
+increment in the full cohort was not robust to these restrictions.
+
 ## General comment 3: prediction horizon leakage
 
 **Response.** We agree. `delta_days` was the subsequently observed interval from the

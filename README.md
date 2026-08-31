@@ -67,6 +67,8 @@ The script writes:
 - `results/reviewer_classification_incremental_value.csv`
 - `results/strict_temporal_validation.csv`
 - `results/followup_exposure_counts.csv`
+- `results/future_max_followup_sensitivity_models.csv`
+- `results/future_max_followup_sensitivity_incremental.csv`
 - `results/future_ge950_repeated_cv_summary.csv`
 - `figures/figure_1_cohort_flow.png`
 - `figures/figure_2_classification_auc.png`
@@ -78,11 +80,10 @@ The script writes:
 
 Models were compared using pre-specified hyperparameters. No GridSearchCV, RandomizedSearchCV, or nested cross-validation was performed. The goal was to evaluate a transparent leakage-aware longitudinal workflow and the incremental value of feature sets, not to maximise performance through extensive hyperparameter tuning.
 
-The source spreadsheet does not include the exact date on which the seasonal
-personal-best score (`PUNTOS`) was achieved. Models containing that predictor are
-prospectively interpretable only after the data owners confirm that the score was
-available on or before each index assessment. No-current-score feature sets are
-included as sensitivity analyses.
+`PUNTOS` was defined by the data owners as the best official competitive result
+available on or before each index assessment. Results achieved after that assessment
+were excluded from predictors. No-current-score feature sets remain available as
+sensitivity analyses.
 
 ## Licence
 
