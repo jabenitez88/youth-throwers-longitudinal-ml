@@ -41,6 +41,16 @@ of out-of-fold predictions, clustered by athlete for repeated-record regression.
 - Calendar-period sensitivity summaries.
 - Participant characteristics, medicine-ball loads, and aggregate data-quality audit.
 
+## Future-maximum follow-up sensitivity
+
+The continuous `future_max_points` analysis was repeated after requiring at least two
+or at least three observed future records within each index instance's 730-day window.
+The restricted cohorts contained 737 instances from 185 athletes and 524 instances
+from 128 athletes, respectively. Gradient-boosting R2 remained 0.500 and 0.526, but
+the paired physical-test increment was no longer present: Delta R2 = -0.015 (95%
+interval -0.062 to 0.024) and -0.007 (-0.046 to 0.027). The manuscript now describes
+the full-cohort increment as not robust to follow-up-exposure restrictions.
+
 ## Unresolved source-data confirmation
 
 The spreadsheet does not contain the exact competition date for `PUNTOS`. The

@@ -549,6 +549,38 @@ def followup_sensitivity(
     return pd.DataFrame(rows)
 
 
+def future_max_followup_sensitivity(
+    horizon_cohort: pd.DataFrame,
+    feature_sets: dict[str, list[str]],
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Repeat future-maximum regression after restricting observed follow-up exposure."""
+    fold_tables = []
+    aggregate_tables = []
+    paired_tables = []
+    for minimum in [1, 2, 3]:
+        data = horizon_cohort[
+            horizon_cohort["n_future_observations"] >= minimum
+        ].reset_index(drop=True)
+        folds, aggregate, paired, _ = evaluate_paired_regression(
+            data,
+            "future_max_points",
+            f"future_horizon_max_min{minimum}",
+            feature_sets,
+        )
+        for table in [folds, aggregate, paired]:
+            table.insert(0, "minimum_future_observations", minimum)
+            table.insert(1, "n_instances", len(data))
+            table.insert(2, "n_unique_athletes", int(data["athlete_key"].nunique()))
+        fold_tables.append(folds)
+        aggregate_tables.append(aggregate)
+        paired_tables.append(paired)
+    return (
+        pd.concat(fold_tables, ignore_index=True),
+        pd.concat(aggregate_tables, ignore_index=True),
+        pd.concat(paired_tables, ignore_index=True),
+    )
+
+
 def participant_characteristics(baseline: pd.DataFrame, features: ml.FeatureSets) -> tuple[pd.DataFrame, pd.DataFrame]:
     continuous_rows = []
     continuous = ["Edad", "PUNTOS", *features.g1_tests, "BOLA", "ARTEFACTO"]
@@ -738,7 +770,16 @@ def write_revision_summary(
     paired_classification: pd.DataFrame,
     temporal: pd.DataFrame,
     exposure: pd.DataFrame,
+    future_max_exposure_models: pd.DataFrame,
+    future_max_exposure_paired: pd.DataFrame,
 ) -> None:
+    future_max_gradient_boosting = future_max_exposure_models[
+        (future_max_exposure_models["model"] == "GradientBoosting")
+        & (future_max_exposure_models["feature_set"] == "g1_current")
+    ]
+    future_max_gradient_boosting_paired = future_max_exposure_paired[
+        future_max_exposure_paired["model"] == "GradientBoosting"
+    ]
     lines = [
         "# Major-revision analysis summary",
         "",
@@ -768,6 +809,20 @@ def write_revision_summary(
         "",
         "```text",
         exposure.round(2).to_string(index=False),
+        "```",
+        "",
+        "## Future-maximum regression by minimum follow-up exposure",
+        "",
+        "Gradient boosting with current score, context, implements, and physical tests:",
+        "",
+        "```text",
+        future_max_gradient_boosting.round(4).to_string(index=False),
+        "```",
+        "",
+        "Paired gradient-boosting increment after adding physical tests:",
+        "",
+        "```text",
+        future_max_gradient_boosting_paired.round(4).to_string(index=False),
         "```",
         "",
         "Cross-validation intervals are descriptive t intervals across the five fixed folds; they are not inferential confidence intervals.",
@@ -856,6 +911,11 @@ def main() -> None:
     temporal = strict_temporal_validation(baseline, classification_feature_sets["g1_current"])
     followup_descriptives, followup_counts = followup_exposure_tables(baseline)
     followup_results = followup_sensitivity(baseline, classification_feature_sets["g1_current"])
+    (
+        future_max_followup_folds,
+        future_max_followup_models,
+        future_max_followup_paired,
+    ) = future_max_followup_sensitivity(horizon_cohort, paired_regression_features)
     participant_continuous, participant_categorical = participant_characteristics(baseline, features)
     ball_loads = medicine_ball_loads(baseline)
     quality_audit = data_quality_audit(g1, features)
@@ -874,6 +934,18 @@ def main() -> None:
     followup_descriptives.to_csv(ml.RESULTS_DIR / "followup_exposure_descriptives.csv", index=False)
     followup_counts.to_csv(ml.RESULTS_DIR / "followup_exposure_counts.csv", index=False)
     followup_results.to_csv(ml.RESULTS_DIR / "followup_observation_sensitivity.csv", index=False)
+    future_max_followup_folds.to_csv(
+        ml.RESULTS_DIR / "future_max_followup_sensitivity_fold_metrics.csv",
+        index=False,
+    )
+    future_max_followup_models.to_csv(
+        ml.RESULTS_DIR / "future_max_followup_sensitivity_models.csv",
+        index=False,
+    )
+    future_max_followup_paired.to_csv(
+        ml.RESULTS_DIR / "future_max_followup_sensitivity_incremental.csv",
+        index=False,
+    )
     participant_continuous.to_csv(ml.RESULTS_DIR / "participant_characteristics_continuous.csv", index=False)
     participant_categorical.to_csv(ml.RESULTS_DIR / "participant_characteristics_categorical.csv", index=False)
     ball_loads.to_csv(ml.RESULTS_DIR / "medicine_ball_loads_by_sex_category.csv", index=False)
@@ -894,7 +966,14 @@ def main() -> None:
     (ml.RESULTS_DIR / "software_versions.json").write_text(json.dumps(software, indent=2), encoding="utf-8")
     plot_calibration_curves(baseline, classification_predictions)
     plot_paired_regression_increment(regression_paired)
-    write_revision_summary(regression_paired, classification_paired, temporal, followup_counts)
+    write_revision_summary(
+        regression_paired,
+        classification_paired,
+        temporal,
+        followup_counts,
+        future_max_followup_models,
+        future_max_followup_paired,
+    )
     print(f"Wrote major-revision analyses to {ml.RESULTS_DIR}")
 
 
