@@ -85,4 +85,47 @@ Paired gradient-boosting increment after adding physical tests:
                            3          524                128 future_horizon_max_min3 future_max_points GradientBoosting context_current_implements          g1_current     524         128                  2000   -0.0072          -0.0459            0.0271    -1.7214           -4.5362             1.0169     -0.5919            -3.5417              2.2701
 ```
 
+## Calendar-period sensitivity
+
+The full-cohort out-of-fold predictions were summarized by index-observation period; these are not independent temporal validations.
+
+```text
+   period           task           outcome            model                feature_set  n_instances  n_athletes  n_positive     r2     mae    rmse  roc_auc  pr_auc  balanced_accuracy     f1  brier
+1997-2005     regression future_max_points GradientBoosting context_current_implements          290         127         NaN 0.4895 52.5725 70.2132      NaN     NaN                NaN    NaN    NaN
+1997-2005     regression future_max_points GradientBoosting                 g1_current          290         127         NaN 0.5633 48.6113 64.9376      NaN     NaN                NaN    NaN    NaN
+1997-2005 classification      future_ge900     RandomForest            context_current          127         127        23.0    NaN     NaN     NaN   0.8482  0.5089             0.8073 0.5938 0.1446
+1997-2005 classification      future_ge900     RandomForest                 g1_current          127         127        23.0    NaN     NaN     NaN   0.8495  0.5262             0.7926 0.6071 0.1358
+2006-2012     regression future_max_points GradientBoosting context_current_implements          221          93         NaN 0.3713 61.0964 83.0877      NaN     NaN                NaN    NaN    NaN
+2006-2012     regression future_max_points GradientBoosting                 g1_current          221          93         NaN 0.4715 57.6996 76.1831      NaN     NaN                NaN    NaN    NaN
+2006-2012 classification      future_ge900     RandomForest            context_current           87          87        24.0    NaN     NaN     NaN   0.8327  0.6108             0.7817 0.6557 0.1634
+2006-2012 classification      future_ge900     RandomForest                 g1_current           87          87        24.0    NaN     NaN     NaN   0.8327  0.6259             0.7718 0.6545 0.1550
+2013-2020     regression future_max_points GradientBoosting context_current_implements          530          94         NaN 0.5801 50.5926 76.9075      NaN     NaN                NaN    NaN    NaN
+2013-2020     regression future_max_points GradientBoosting                 g1_current          530          94         NaN 0.5987 50.1144 75.1853      NaN     NaN                NaN    NaN    NaN
+2013-2020 classification      future_ge900     RandomForest            context_current           75          75        32.0    NaN     NaN     NaN   0.9208  0.8569             0.8870 0.8710 0.1163
+2013-2020 classification      future_ge900     RandomForest                 g1_current           75          75        32.0    NaN     NaN     NaN   0.9092  0.8931             0.8830 0.8667 0.1219
+```
+
+Paired within-period increment after adding the four physical tests:
+
+```text
+   period           task           outcome            model     without_physical_tests with_physical_tests  n_instances  n_athletes  n_positive  bootstrap_replicates  delta_r2  delta_r2_ci_low  delta_r2_ci_high  delta_mae  delta_mae_ci_low  delta_mae_ci_high  delta_rmse  delta_rmse_ci_low  delta_rmse_ci_high  delta_roc_auc  delta_roc_auc_ci_low  delta_roc_auc_ci_high  delta_pr_auc  delta_pr_auc_ci_low  delta_pr_auc_ci_high  delta_brier  delta_brier_ci_low  delta_brier_ci_high
+1997-2005     regression future_max_points GradientBoosting context_current_implements          g1_current          290         127         NaN                  2000    0.0738           0.0123            0.1508     3.9613            0.7213             7.5887      5.2756             0.8987             10.6380            NaN                   NaN                    NaN           NaN                  NaN                   NaN          NaN                 NaN                  NaN
+1997-2005 classification      future_ge900     RandomForest            context_current          g1_current          127         127        23.0                  2000       NaN              NaN               NaN        NaN               NaN                NaN         NaN                NaN                 NaN         0.0013               -0.0314                 0.0310        0.0173              -0.0472                0.1201       0.0088             -0.0022               0.0200
+2006-2012     regression future_max_points GradientBoosting context_current_implements          g1_current          221          93         NaN                  2000    0.1001           0.0406            0.1716     3.3968           -0.1152             7.0163      6.9046             2.8065             11.2541            NaN                   NaN                    NaN           NaN                  NaN                   NaN          NaN                 NaN                  NaN
+2006-2012 classification      future_ge900     RandomForest            context_current          g1_current           87          87        24.0                  2000       NaN              NaN               NaN        NaN               NaN                NaN         NaN                NaN                 NaN         0.0000               -0.0371                 0.0399        0.0151              -0.1008                0.0931       0.0084             -0.0064               0.0252
+2013-2020     regression future_max_points GradientBoosting context_current_implements          g1_current          530          94         NaN                  2000    0.0186          -0.0210            0.0636     0.4783           -2.3904             3.4318      1.7222            -1.9405              5.6429            NaN                   NaN                    NaN           NaN                  NaN                   NaN          NaN                 NaN                  NaN
+2013-2020 classification      future_ge900     RandomForest            context_current          g1_current           75          75        32.0                  2000       NaN              NaN               NaN        NaN               NaN                NaN         NaN                NaN                 NaN        -0.0116               -0.0440                 0.0151        0.0361              -0.0391                0.0978      -0.0056             -0.0198               0.0071
+```
+
+## Future >=950 validation-fold event counts
+
+```text
+ fold  n  n_positive  n_negative
+    1 58           9          49
+    2 58           8          50
+    3 58           8          50
+    4 58           8          50
+    5 57           8          49
+```
+
 Cross-validation intervals are descriptive t intervals across the five fixed folds; they are not inferential confidence intervals.

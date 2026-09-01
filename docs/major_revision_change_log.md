@@ -39,6 +39,7 @@ of out-of-fold predictions, clustered by athlete for repeated-record regression.
 - Follow-up observation-count and follow-up-span summaries and restricted-cohort sensitivities.
 - Improvement thresholds of 25, 50, and 75 points plus continuous-change regression.
 - Calendar-period sensitivity summaries.
+- Exact `future_ge950` validation-fold event counts (9, 8, 8, 8, and 8 positives).
 - Participant characteristics, medicine-ball loads, and aggregate data-quality audit.
 
 ## Future-maximum follow-up sensitivity
@@ -50,6 +51,17 @@ from 128 athletes, respectively. Gradient-boosting R2 remained 0.500 and 0.526, 
 the paired physical-test increment was no longer present: Delta R2 = -0.015 (95%
 interval -0.062 to 0.024) and -0.007 (-0.046 to 0.027). The manuscript now describes
 the full-cohort increment as not robust to follow-up-exposure restrictions.
+
+## Calendar-period sensitivity
+
+Full-cohort OOF predictions were summarized by index period rather than refitting
+three period-specific models. For `future_max_points`, paired Gradient-Boosting
+Delta R2 values after adding physical tests were 0.074 (95% interval 0.012 to
+0.151) in 1997-2005, 0.100 (0.041 to 0.172) in 2006-2012, and 0.019 (-0.021 to
+0.064) in 2013-2020. For `future_ge900`, paired Random-Forest Delta ROC-AUC values
+were 0.001 (-0.031 to 0.031), 0.000 (-0.037 to 0.040), and -0.012 (-0.044 to
+0.015), respectively. The classification conclusion was stable, whereas the
+regression increment was heterogeneous across historical periods.
 
 ## Unresolved source-data confirmation
 

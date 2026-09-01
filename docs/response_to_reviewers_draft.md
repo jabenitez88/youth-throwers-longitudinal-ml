@@ -93,7 +93,9 @@ five-fold `StratifiedKFold` for the athlete-level binary outcomes. Stratificatio
 was generated separately for each outcome with `shuffle=True` and `random_state=42`;
 the same folds were reused for every algorithm and predictor set within that outcome.
 The revised tables include the positive count in each fold. For `future_ge950`
-(41 positives), we added ten-times repeated five-fold stratified cross-validation.
+(41 positives), validation folds 1-5 contained 9, 8, 8, 8, and 8 positive
+cases, respectively (fold sizes 58, 58, 58, 58, and 57). We also added
+ten-times repeated five-fold stratified cross-validation.
 Across the ten repeats, mean ROC-AUC was 0.844 for random forest with physical tests
 (repeat range summarized by the 2.5th-97.5th percentiles: 0.827-0.866). We added
 PR-AUC, Brier score, calibration intercept, calibration slope, and calibration plots.
@@ -119,9 +121,26 @@ tests, medicine-ball load, implement weight, and missingness.
 ## Specific comment: calendar period
 
 **Response.** We added out-of-fold sensitivity summaries for 1997-2005, 2006-2012,
-and 2013-2020 and discuss possible temporal changes in cohort composition,
-measurement practice, and calibration. These summaries are not described as
-independent external validation.
+and 2013-2020. These used the full-cohort out-of-fold predictions and were
+stratified post hoc by the calendar year of the index observation; they are not
+independent temporal validations. For `future_max_points`, the three periods
+contained 290 instances/127 athletes, 221/93, and 530/94, respectively. Gradient
+boosting R2 without versus with the four physical tests was 0.489 versus 0.563,
+0.371 versus 0.471, and 0.580 versus 0.599. The paired Delta R2 values were 0.074
+(athlete-cluster bootstrap 95% interval 0.012 to 0.151), 0.100 (0.041 to 0.172),
+and 0.019 (-0.021 to 0.064), respectively. Thus, the regression increment was
+larger in the first two periods and small and uncertain in 2013-2020.
+
+For `future_ge900`, the periods contained 127 athletes/23 positives, 87/24, and
+75/32. Random-forest ROC-AUC without versus with physical tests was 0.848 versus
+0.849, 0.833 versus 0.833, and 0.921 versus 0.909. Paired Delta ROC-AUC values
+were 0.001 (-0.031 to 0.031), 0.000 (-0.037 to 0.040), and -0.012 (-0.044 to
+0.015); every interval included zero. Accordingly, the conclusion of no clear
+incremental discrimination from physical tests was consistent across periods,
+whereas the regression increment was historically heterogeneous. We now discuss
+possible changes in cohort composition, measurement practice, coaching systems,
+and competition opportunities. The database did not contain a protocol-version
+history, so exact procedural invariance across all 23 years could not be verified.
 
 ## Specific comment: medicine-ball protocol
 
