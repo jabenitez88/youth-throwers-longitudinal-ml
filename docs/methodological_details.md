@@ -165,9 +165,16 @@ Sensitivity analyses were repeated among athletes with at least two and at least
 three future observations. Follow-up count was not entered as a predictor because
 it is not known at the index date.
 
-Out-of-fold performance was also summarized for calendar periods 1997-2005,
-2006-2012, and 2013-2020. These are sensitivity summaries rather than independent
-external validations.
+Full-cohort out-of-fold predictions were also summarized according to the calendar
+year of the index observation for 1997-2005, 2006-2012, and 2013-2020. These are
+sensitivity summaries rather than period-specific model fits or independent temporal
+validations. For continuous `future_max_points`, Gradient Boosting was compared with
+the `context_current_implements` and `g1_current` predictor sets. For `future_ge900`,
+Random Forest was compared with `context_current` and `g1_current`. Within each period,
+the incremental value of the four physical tests was calculated from paired OOF
+predictions using 2,000 percentile bootstrap replicates; regression resampling was
+clustered by athlete. Athletes could contribute index instances to more than one
+calendar period in the repeated-instance regression cohort.
 
 For the repeated-instance `future_max_points` cohort, follow-up sensitivity was
 defined at the index-instance level. An instance was retained only when its 730-day

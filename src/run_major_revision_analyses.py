@@ -663,40 +663,132 @@ def data_quality_audit(g1: pd.DataFrame, features: ml.FeatureSets) -> dict:
 
 
 def calendar_period_performance(
+    horizon_cohort: pd.DataFrame,
     baseline: pd.DataFrame,
     regression_predictions: dict[tuple[str, str], np.ndarray],
     classification_predictions: dict[tuple[str, str, str], np.ndarray],
-) -> pd.DataFrame:
-    periods = pd.cut(
-        baseline["year"],
-        bins=[-np.inf, 2005, 2012, np.inf],
-        labels=["1997-2005", "2006-2012", "2013-2020"],
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    period_bins = [-np.inf, 2005, 2012, np.inf]
+    period_labels = ["1997-2005", "2006-2012", "2013-2020"]
+    regression_periods = pd.cut(
+        horizon_cohort["year"], bins=period_bins, labels=period_labels
     )
-    rows = []
-    reg_pred = regression_predictions[("GradientBoosting", "g1_current")]
-    cls_pred = classification_predictions[("future_ge900", "RandomForest", "g1_current")]
-    cls_y = (baseline["future_max_points"] >= 900).astype(int).to_numpy()
-    for period in periods.cat.categories:
-        mask = (periods == period).to_numpy()
-        rows.append(
-            {
-                "period": period,
-                "task": "continuous_change_regression",
-                "n": int(mask.sum()),
-                **regression_metrics(baseline.loc[mask, "future_delta_points"].to_numpy(), reg_pred[mask]),
-            }
-        )
-        if len(np.unique(cls_y[mask])) == 2:
-            rows.append(
+    classification_periods = pd.cut(
+        baseline["year"], bins=period_bins, labels=period_labels
+    )
+    model_rows = []
+    paired_rows = []
+
+    regression_target = horizon_cohort["future_max_points"].to_numpy()
+    regression_groups = horizon_cohort["athlete_key"].to_numpy()
+    regression_model = "GradientBoosting"
+    regression_feature_sets = ["context_current_implements", "g1_current"]
+
+    classification_target = (baseline["future_max_points"] >= 900).astype(int).to_numpy()
+    classification_groups = baseline["athlete_key"].to_numpy()
+    classification_model = "RandomForest"
+    classification_feature_sets = ["context_current", "g1_current"]
+
+    for period in period_labels:
+        regression_mask = (regression_periods == period).to_numpy()
+        regression_y = regression_target[regression_mask]
+        regression_group_subset = regression_groups[regression_mask]
+        for feature_set in regression_feature_sets:
+            prediction = regression_predictions[(regression_model, feature_set)][regression_mask]
+            model_rows.append(
                 {
                     "period": period,
-                    "task": "future_ge900_classification",
-                    "n": int(mask.sum()),
-                    "n_positive": int(cls_y[mask].sum()),
-                    **classification_metrics(cls_y[mask], cls_pred[mask]),
+                    "task": "regression",
+                    "outcome": "future_max_points",
+                    "model": regression_model,
+                    "feature_set": feature_set,
+                    "n_instances": int(regression_mask.sum()),
+                    "n_athletes": int(np.unique(regression_group_subset).size),
+                    "n_positive": float("nan"),
+                    **regression_metrics(regression_y, prediction),
                 }
             )
-    return pd.DataFrame(rows)
+        regression_without = regression_predictions[
+            (regression_model, regression_feature_sets[0])
+        ][regression_mask]
+        regression_with = regression_predictions[
+            (regression_model, regression_feature_sets[1])
+        ][regression_mask]
+        regression_delta = paired_regression_bootstrap(
+            regression_y,
+            regression_without,
+            regression_with,
+            regression_group_subset,
+        )
+        regression_row = {
+            "period": period,
+            "task": "regression",
+            "outcome": "future_max_points",
+            "model": regression_model,
+            "without_physical_tests": regression_feature_sets[0],
+            "with_physical_tests": regression_feature_sets[1],
+            "n_instances": int(regression_mask.sum()),
+            "n_athletes": int(np.unique(regression_group_subset).size),
+            "n_positive": float("nan"),
+            "bootstrap_replicates": BOOTSTRAP_REPLICATES,
+        }
+        for metric, (estimate, low, high) in regression_delta.items():
+            regression_row.update(
+                {metric: estimate, f"{metric}_ci_low": low, f"{metric}_ci_high": high}
+            )
+        paired_rows.append(regression_row)
+
+        classification_mask = (classification_periods == period).to_numpy()
+        classification_y = classification_target[classification_mask]
+        classification_group_subset = classification_groups[classification_mask]
+        for feature_set in classification_feature_sets:
+            probability = classification_predictions[
+                ("future_ge900", classification_model, feature_set)
+            ][classification_mask]
+            model_rows.append(
+                {
+                    "period": period,
+                    "task": "classification",
+                    "outcome": "future_ge900",
+                    "model": classification_model,
+                    "feature_set": feature_set,
+                    "n_instances": int(classification_mask.sum()),
+                    "n_athletes": int(np.unique(classification_group_subset).size),
+                    "n_positive": int(classification_y.sum()),
+                    **classification_metrics(classification_y, probability),
+                }
+            )
+        classification_without = classification_predictions[
+            ("future_ge900", classification_model, classification_feature_sets[0])
+        ][classification_mask]
+        classification_with = classification_predictions[
+            ("future_ge900", classification_model, classification_feature_sets[1])
+        ][classification_mask]
+        classification_delta = paired_classification_bootstrap(
+            classification_y,
+            classification_without,
+            classification_with,
+            classification_group_subset,
+        )
+        classification_row = {
+            "period": period,
+            "task": "classification",
+            "outcome": "future_ge900",
+            "model": classification_model,
+            "without_physical_tests": classification_feature_sets[0],
+            "with_physical_tests": classification_feature_sets[1],
+            "n_instances": int(classification_mask.sum()),
+            "n_athletes": int(np.unique(classification_group_subset).size),
+            "n_positive": int(classification_y.sum()),
+            "bootstrap_replicates": BOOTSTRAP_REPLICATES,
+        }
+        for metric, (estimate, low, high) in classification_delta.items():
+            classification_row.update(
+                {metric: estimate, f"{metric}_ci_low": low, f"{metric}_ci_high": high}
+            )
+        paired_rows.append(classification_row)
+
+    return pd.DataFrame(model_rows), pd.DataFrame(paired_rows)
 
 
 def plot_calibration_curves(
@@ -772,6 +864,9 @@ def write_revision_summary(
     exposure: pd.DataFrame,
     future_max_exposure_models: pd.DataFrame,
     future_max_exposure_paired: pd.DataFrame,
+    calendar_models: pd.DataFrame,
+    calendar_paired: pd.DataFrame,
+    future_ge950_fold_counts: pd.DataFrame,
 ) -> None:
     future_max_gradient_boosting = future_max_exposure_models[
         (future_max_exposure_models["model"] == "GradientBoosting")
@@ -825,6 +920,26 @@ def write_revision_summary(
         future_max_gradient_boosting_paired.round(4).to_string(index=False),
         "```",
         "",
+        "## Calendar-period sensitivity",
+        "",
+        "The full-cohort out-of-fold predictions were summarized by index-observation period; these are not independent temporal validations.",
+        "",
+        "```text",
+        calendar_models.round(4).to_string(index=False),
+        "```",
+        "",
+        "Paired within-period increment after adding the four physical tests:",
+        "",
+        "```text",
+        calendar_paired.round(4).to_string(index=False),
+        "```",
+        "",
+        "## Future >=950 validation-fold event counts",
+        "",
+        "```text",
+        future_ge950_fold_counts.to_string(index=False),
+        "```",
+        "",
         "Cross-validation intervals are descriptive t intervals across the five fixed folds; they are not inferential confidence intervals.",
     ]
     (ml.RESULTS_DIR / "MAJOR_REVISION_SUMMARY.md").write_text("\n".join(lines), encoding="utf-8")
@@ -850,7 +965,7 @@ def main() -> None:
     regression_fold_tables = []
     regression_aggregate_tables = []
     regression_paired_tables = []
-    baseline_regression_predictions = {}
+    horizon_regression_predictions = {}
     for data, target, analysis in regression_runs:
         fold, aggregate, paired, predictions = evaluate_paired_regression(
             data,
@@ -861,8 +976,8 @@ def main() -> None:
         regression_fold_tables.append(fold)
         regression_aggregate_tables.append(aggregate)
         regression_paired_tables.append(paired)
-        if analysis == "baseline_continuous_change":
-            baseline_regression_predictions = predictions
+        if analysis == "future_horizon_max":
+            horizon_regression_predictions = predictions
     regression_folds = pd.concat(regression_fold_tables, ignore_index=True)
     regression_aggregate = pd.concat(regression_aggregate_tables, ignore_index=True)
     regression_paired = pd.concat(regression_paired_tables, ignore_index=True)
@@ -919,7 +1034,19 @@ def main() -> None:
     participant_continuous, participant_categorical = participant_characteristics(baseline, features)
     ball_loads = medicine_ball_loads(baseline)
     quality_audit = data_quality_audit(g1, features)
-    calendar = calendar_period_performance(baseline, baseline_regression_predictions, classification_predictions)
+    calendar_models, calendar_paired = calendar_period_performance(
+        horizon_cohort,
+        baseline,
+        horizon_regression_predictions,
+        classification_predictions,
+    )
+    future_ge950_fold_counts = (
+        classification_folds[classification_folds["outcome"] == "future_ge950"]
+        [["fold", "n", "n_positive", "n_negative"]]
+        .drop_duplicates()
+        .sort_values("fold")
+        .reset_index(drop=True)
+    )
 
     regression_folds.to_csv(ml.RESULTS_DIR / "reviewer_regression_fold_metrics.csv", index=False)
     regression_aggregate.to_csv(ml.RESULTS_DIR / "reviewer_regression_paired_models.csv", index=False)
@@ -953,7 +1080,13 @@ def main() -> None:
         json.dumps(quality_audit, indent=2),
         encoding="utf-8",
     )
-    calendar.to_csv(ml.RESULTS_DIR / "calendar_period_sensitivity.csv", index=False)
+    calendar_models.to_csv(ml.RESULTS_DIR / "calendar_period_sensitivity.csv", index=False)
+    calendar_paired.to_csv(
+        ml.RESULTS_DIR / "calendar_period_sensitivity_incremental.csv", index=False
+    )
+    future_ge950_fold_counts.to_csv(
+        ml.RESULTS_DIR / "future_ge950_fold_positive_counts.csv", index=False
+    )
 
     software = {
         "python": platform.python_version(),
@@ -973,6 +1106,9 @@ def main() -> None:
         followup_counts,
         future_max_followup_models,
         future_max_followup_paired,
+        calendar_models,
+        calendar_paired,
+        future_ge950_fold_counts,
     )
     print(f"Wrote major-revision analyses to {ml.RESULTS_DIR}")
 
