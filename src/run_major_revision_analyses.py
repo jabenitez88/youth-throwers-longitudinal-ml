@@ -38,6 +38,35 @@ BOOTSTRAP_REPLICATES = 2000
 REPEATED_CV_REPEATS = 10
 
 
+def iaaf_2017_applied_error_examples() -> pd.DataFrame:
+    rows = [
+        ("Women", "Shot put", 800, 13.46, -45, 755, 12.73),
+        ("Women", "Shot put", 800, 13.46, -40, 760, 12.81),
+        ("Women", "Shot put", 800, 13.46, 0, 800, 13.46),
+        ("Women", "Shot put", 800, 13.46, 40, 840, 14.10),
+        ("Women", "Shot put", 800, 13.46, 45, 845, 14.18),
+        ("Men", "Discus throw", 800, 45.76, -45, 755, 43.30),
+        ("Men", "Discus throw", 800, 45.76, -40, 760, 43.57),
+        ("Men", "Discus throw", 800, 45.76, 0, 800, 45.76),
+        ("Men", "Discus throw", 800, 45.76, 40, 840, 47.95),
+        ("Men", "Discus throw", 800, 45.76, 45, 845, 48.23),
+    ]
+    columns = [
+        "sex",
+        "event",
+        "reference_points",
+        "reference_distance_m",
+        "point_difference",
+        "target_points",
+        "target_distance_m",
+    ]
+    result = pd.DataFrame(rows, columns=columns)
+    result["distance_difference_m"] = (
+        result["target_distance_m"] - result["reference_distance_m"]
+    ).round(2)
+    return result
+
+
 def percentile_interval(values: Iterable[float]) -> tuple[float, float]:
     values = np.asarray(list(values), dtype=float)
     values = values[np.isfinite(values)]
@@ -867,6 +896,7 @@ def write_revision_summary(
     calendar_models: pd.DataFrame,
     calendar_paired: pd.DataFrame,
     future_ge950_fold_counts: pd.DataFrame,
+    applied_error_examples: pd.DataFrame,
 ) -> None:
     future_max_gradient_boosting = future_max_exposure_models[
         (future_max_exposure_models["model"] == "GradientBoosting")
@@ -939,6 +969,18 @@ def write_revision_summary(
         "```text",
         future_ge950_fold_counts.to_string(index=False),
         "```",
+        "",
+        "## Applied interpretation of a 40-45-point error",
+        "",
+        "Exact entries from the sex- and event-specific IAAF Scoring Tables of Athletics,",
+        "2017 revised edition, at a representative 800-point level:",
+        "",
+        "```text",
+        applied_error_examples.round(2).to_string(index=False),
+        "```",
+        "",
+        "The tables are progressive, so these are local examples rather than fixed",
+        "distance conversions across events or performance levels.",
         "",
         "Cross-validation intervals are descriptive t intervals across the five fixed folds; they are not inferential confidence intervals.",
     ]
@@ -1047,6 +1089,7 @@ def main() -> None:
         .sort_values("fold")
         .reset_index(drop=True)
     )
+    applied_error_examples = iaaf_2017_applied_error_examples()
 
     regression_folds.to_csv(ml.RESULTS_DIR / "reviewer_regression_fold_metrics.csv", index=False)
     regression_aggregate.to_csv(ml.RESULTS_DIR / "reviewer_regression_paired_models.csv", index=False)
@@ -1087,6 +1130,9 @@ def main() -> None:
     future_ge950_fold_counts.to_csv(
         ml.RESULTS_DIR / "future_ge950_fold_positive_counts.csv", index=False
     )
+    applied_error_examples.to_csv(
+        ml.RESULTS_DIR / "iaaf_2017_applied_error_examples.csv", index=False
+    )
 
     software = {
         "python": platform.python_version(),
@@ -1109,6 +1155,7 @@ def main() -> None:
         calendar_models,
         calendar_paired,
         future_ge950_fold_counts,
+        applied_error_examples,
     )
     print(f"Wrote major-revision analyses to {ml.RESULTS_DIR}")
 

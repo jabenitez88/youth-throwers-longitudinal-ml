@@ -40,6 +40,7 @@ of out-of-fold predictions, clustered by athlete for repeated-record regression.
 - Improvement thresholds of 25, 50, and 75 points plus continuous-change regression.
 - Calendar-period sensitivity summaries.
 - Exact `future_ge950` validation-fold event counts (9, 8, 8, 8, and 8 positives).
+- Applied conversion of a 40-45-point absolute error into representative throwing distances.
 - Participant characteristics, medicine-ball loads, and aggregate data-quality audit.
 
 ## Future-maximum follow-up sensitivity
@@ -62,6 +63,14 @@ Delta R2 values after adding physical tests were 0.074 (95% interval 0.012 to
 were 0.001 (-0.031 to 0.031), 0.000 (-0.037 to 0.040), and -0.012 (-0.044 to
 0.015), respectively. The classification conclusion was stable, whereas the
 regression increment was heterogeneous across historical periods.
+
+## Applied interpretation of prediction error
+
+Using exact entries from the 2017 revised IAAF scoring tables at a representative
+800-point level, a 40-45-point difference corresponds to approximately 0.64-0.73 m
+in women's shot put and 2.19-2.47 m in men's discus. The manuscript states that
+these are local examples rather than fixed conversions because the scoring tables
+are progressive and event- and sex-specific.
 
 ## Unresolved source-data confirmation
 
