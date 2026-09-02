@@ -1,0 +1,11 @@
+sex,event,reference_points,reference_distance_m,point_difference,target_points,target_distance_m,distance_difference_m
+Women,Shot put,800,13.46,-45,755,12.73,-0.73
+Women,Shot put,800,13.46,-40,760,12.81,-0.65
+Women,Shot put,800,13.46,0,800,13.46,0.0
+Women,Shot put,800,13.46,40,840,14.1,0.64
+Women,Shot put,800,13.46,45,845,14.18,0.72
+Men,Discus throw,800,45.76,-45,755,43.3,-2.46
+Men,Discus throw,800,45.76,-40,760,43.57,-2.19
+Men,Discus throw,800,45.76,0,800,45.76,0.0
+Men,Discus throw,800,45.76,40,840,47.95,2.19
+Men,Discus throw,800,45.76,45,845,48.23,2.47

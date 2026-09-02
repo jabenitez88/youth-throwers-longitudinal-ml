@@ -73,6 +73,7 @@ The script writes:
 - `results/calendar_period_sensitivity.csv`
 - `results/calendar_period_sensitivity_incremental.csv`
 - `results/future_ge950_fold_positive_counts.csv`
+- `results/iaaf_2017_applied_error_examples.csv`
 - `figures/figure_1_cohort_flow.png`
 - `figures/figure_2_classification_auc.png`
 - `figures/figure_3_permutation_importance.png`

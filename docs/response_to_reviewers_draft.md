@@ -172,6 +172,32 @@ feature per fold, and ROC-AUC as the scoring metric. Reported means are averaged
 across folds and the standard deviation is the SD of fold means. Interpretation is
 now explicitly model-dependent, correlation-dependent, and non-causal.
 
+## Specific comment 20: applied interpretation of absolute prediction error
+
+**Response.** We agree that expressing the point-scale error in event-specific
+distances improves its practical interpretation. We used the exact sex- and
+event-specific entries in the IAAF Scoring Tables of Athletics, 2017 revised
+edition. We selected 800 points as a representative reference because it is close
+to the centre of the baseline score distribution (median 772; IQR 710-841) and
+used two well-represented events in the cohort.
+
+For women's shot put, 13.46 m corresponds to 800 points. Scores 40 points lower
+and higher correspond to 12.81 m (760 points) and 14.10 m (840 points), while
+scores 45 points lower and higher correspond to 12.73 m (755 points) and 14.18 m
+(845 points). Thus, around this level, 40-45 points represent approximately
+0.64-0.73 m.
+
+For men's discus throw, 45.76 m corresponds to 800 points. Scores 40 points lower
+and higher correspond to 43.57 m and 47.95 m, while scores 45 points lower and
+higher correspond to 43.30 m and 48.23 m. Thus, around this level, 40-45 points
+represent approximately 2.19-2.47 m.
+
+We added these examples to the Results. We also clarified that the scoring tables
+are progressive; consequently, the metric-distance equivalent is not fixed and
+depends on sex, event, and the reference performance level. The examples should
+therefore be interpreted as local approximations around 800 points rather than
+universal conversions.
+
 ## Terminology and editorial changes
 
 **Response.** We defined `g1_current` in terms of its actual predictors, replaced

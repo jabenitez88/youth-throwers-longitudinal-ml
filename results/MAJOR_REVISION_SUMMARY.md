@@ -128,4 +128,26 @@ Paired within-period increment after adding the four physical tests:
     5 57           8          49
 ```
 
+## Applied interpretation of a 40-45-point error
+
+Exact entries from the sex- and event-specific IAAF Scoring Tables of Athletics,
+2017 revised edition, at a representative 800-point level:
+
+```text
+  sex        event  reference_points  reference_distance_m  point_difference  target_points  target_distance_m  distance_difference_m
+Women     Shot put               800                 13.46               -45            755              12.73                  -0.73
+Women     Shot put               800                 13.46               -40            760              12.81                  -0.65
+Women     Shot put               800                 13.46                 0            800              13.46                   0.00
+Women     Shot put               800                 13.46                40            840              14.10                   0.64
+Women     Shot put               800                 13.46                45            845              14.18                   0.72
+  Men Discus throw               800                 45.76               -45            755              43.30                  -2.46
+  Men Discus throw               800                 45.76               -40            760              43.57                  -2.19
+  Men Discus throw               800                 45.76                 0            800              45.76                   0.00
+  Men Discus throw               800                 45.76                40            840              47.95                   2.19
+  Men Discus throw               800                 45.76                45            845              48.23                   2.47
+```
+
+The tables are progressive, so these are local examples rather than fixed
+distance conversions across events or performance levels.
+
 Cross-validation intervals are descriptive t intervals across the five fixed folds; they are not inferential confidence intervals.
