@@ -49,6 +49,13 @@ Classification outcomes were improvement of at least 50 points and a future
 maximum of at least 900 or 950 points. Improvement thresholds of 25 and 75 points
 were added as sensitivity analyses.
 
+The 900- and 950-point outcomes represent future performance level, not incident
+first attainment. In the 289-athlete baseline cohort, 41 athletes were already at
+or above 900 points and 19 were already at or above 950 points. Among the 79
+`future_ge900` cases, 35 were already at or above 900 at baseline and 44 attained
+the threshold from below. Among the 41 `future_ge950` cases, the corresponding
+counts were 18 and 23.
+
 The 730-day window was selected a priori as a medium-term development horizon
 covering approximately two annual training and competition cycles while retaining
 enough repeated observations for athlete-grouped validation. It is an operational
@@ -157,6 +164,10 @@ the cutoff. This produced 168 training athletes and 82 later test athletes, with
 athlete overlap. The same strict split was used for `future_max_points`,
 `future_ge900`, and `future_ge950`.
 
+All three strict chronological analyses used the same `g1_current` predictors:
+`PUNTOS`, `Edad`, `Sexo`, `Categoria`, `Prueba`, `BOLA`, `ARTEFACTO`, `Dorsal`,
+`Salto Vertical`, `Longitud PJ`, and `Triple PJ`.
+
 ## Follow-up exposure and calendar sensitivity
 
 The baseline cohort had a median of 2 future observations (IQR 1-3; range 1-13)
@@ -191,6 +202,20 @@ aggregate-model, and paired-increment results are available in
 `future_max_followup_sensitivity_fold_metrics.csv`,
 `future_max_followup_sensitivity_models.csv`, and
 `future_max_followup_sensitivity_incremental.csv`.
+
+The original sensitivity table displayed mean fold R2 values while its paired Delta
+R2 was calculated from pooled OOF predictions. This explains why the at-least-three
+values 0.545 and 0.526 did not subtract to the reported -0.007: their direct
+fold-mean difference is -0.019, whereas pooled OOF R2 was 0.568 without tests and
+0.561 with tests, giving -0.007. For consistency, the revised table reports pooled
+OOF R2, MAE, and RMSE throughout. The analogous at-least-two OOF values are 0.574
+without tests and 0.560 with tests, giving Delta R2 = -0.015.
+
+For Table 3, the best algorithm within each predictor set was selected by highest
+mean five-fold R2. For `next_points`, the seven algorithms in table order were
+Ridge, Ridge, Ridge, Random Forest, Random Forest, Ridge, and Random Forest. For
+`future_max_points`, they were Ridge, Ridge, Ridge, Ridge, Ridge, Gradient Boosting,
+and Ridge.
 
 ## Permutation importance
 

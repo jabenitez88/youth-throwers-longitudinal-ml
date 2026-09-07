@@ -48,7 +48,8 @@ of out-of-fold predictions, clustered by athlete for repeated-record regression.
 The continuous `future_max_points` analysis was repeated after requiring at least two
 or at least three observed future records within each index instance's 730-day window.
 The restricted cohorts contained 737 instances from 185 athletes and 524 instances
-from 128 athletes, respectively. Gradient-boosting R2 remained 0.500 and 0.526, but
+from 128 athletes, respectively. Pooled OOF Gradient-Boosting R2 with physical tests
+was 0.560 and 0.561, respectively, but
 the paired physical-test increment was no longer present: Delta R2 = -0.015 (95%
 interval -0.062 to 0.024) and -0.007 (-0.046 to 0.027). The manuscript now describes
 the full-cohort increment as not robust to follow-up-exposure restrictions.
@@ -79,3 +80,14 @@ source publication describes it as a season personal best. The authors must conf
 that each score was known on or before the corresponding index assessment before
 describing score-anchored models as fully prospective. The repository retains
 no-current-score feature sets as a sensitivity analysis.
+
+## Second-review technical clarifications
+
+Aggregate baseline cross-tabs were added for the 900- and 950-point outcomes. Table
+3 now identifies the best algorithm for every predictor set and outcome. The strict
+chronological table now states the exact common `g1_current` predictor set.
+
+The follow-up sensitivity table previously combined mean fold R2 values with a
+paired Delta R2 calculated from pooled out-of-fold predictions. The revised table
+uses pooled OOF R2, MAE, and RMSE throughout, preserving the paired Delta R2 and its
+athlete-cluster bootstrap interval. No model was refitted for this correction.

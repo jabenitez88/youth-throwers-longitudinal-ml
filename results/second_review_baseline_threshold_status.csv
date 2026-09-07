@@ -1,0 +1,3 @@
+threshold,n_cohort,baseline_at_or_above,future_positive,already_at_or_above_among_future_positive,below_baseline_then_attained,baseline_at_or_above_but_future_negative
+900,289,41,79,35,44,6
+950,289,19,41,18,23,1

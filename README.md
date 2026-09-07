@@ -48,6 +48,7 @@ Run:
 ```bash
 python src/run_longitudinal_ml.py
 python src/run_major_revision_analyses.py
+python src/run_second_review_checks.py
 ```
 
 The script writes:
@@ -74,6 +75,10 @@ The script writes:
 - `results/calendar_period_sensitivity_incremental.csv`
 - `results/future_ge950_fold_positive_counts.csv`
 - `results/iaaf_2017_applied_error_examples.csv`
+- `results/second_review_baseline_threshold_status.csv`
+- `results/second_review_best_algorithms_by_predictor_set.csv`
+- `results/second_review_followup_sensitivity_oof.csv`
+- `results/second_review_strict_temporal_predictors.csv`
 - `figures/figure_1_cohort_flow.png`
 - `figures/figure_2_classification_auc.png`
 - `figures/figure_3_permutation_importance.png`
