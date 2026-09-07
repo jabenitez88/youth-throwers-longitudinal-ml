@@ -1,0 +1,4 @@
+outcome,feature_set,predictors
+future_ge900,g1_current,PUNTOS; Edad; Sexo; Categoria; Prueba; BOLA; ARTEFACTO; Dorsal; Salto Vertical; Longitud PJ; Triple PJ
+future_ge950,g1_current,PUNTOS; Edad; Sexo; Categoria; Prueba; BOLA; ARTEFACTO; Dorsal; Salto Vertical; Longitud PJ; Triple PJ
+future_max_points,g1_current,PUNTOS; Edad; Sexo; Categoria; Prueba; BOLA; ARTEFACTO; Dorsal; Salto Vertical; Longitud PJ; Triple PJ

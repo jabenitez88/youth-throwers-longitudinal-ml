@@ -1,0 +1,15 @@
+target,feature_set,predictor_set_label,model,r2_mean,mae_mean,rmse_mean
+future_max_points,g1_tests_only,Physical tests only,Ridge,0.2496912352858709,82.21686380113499,100.79739595714132
+future_max_points,context_g1_no_current,"Context + physical tests, no current score",Ridge,0.3508381882473062,76.82286316284225,94.04983515508648
+future_max_points,current_only,Current score only,Ridge,0.5593885630004964,55.73589819706007,76.3912079220099
+future_max_points,context_current,Current score + athlete/event context,Ridge,0.6002263925724098,53.43690414391108,73.01504512991623
+future_max_points,context_current_implements,Current + context + implements,Ridge,0.5984973124074833,53.4195299012957,73.18468320768767
+future_max_points,g1_current,Current + context + implements + physical tests,GradientBoosting,0.6160480973711457,51.30965923608058,71.88464859703359
+future_max_points,broader_g1_current,Full broader sensitivity set,Ridge,0.6056931497492488,53.74876559517346,72.70636541255365
+next_points,g1_tests_only,Physical tests only,Ridge,0.2125362542137997,80.34856626341349,101.64849977534035
+next_points,context_g1_no_current,"Context + physical tests, no current score",Ridge,0.3022766361587985,74.932464098884,95.93321272993892
+next_points,current_only,Current score only,Ridge,0.6110220457328293,43.49223835685046,69.59047810000293
+next_points,context_current,Current score + athlete/event context,RandomForest,0.6350667561430192,41.153097826649656,68.24986416195205
+next_points,context_current_implements,Current + context + implements,RandomForest,0.6352610258529319,41.73743841698493,68.293558820285
+next_points,g1_current,Current + context + implements + physical tests,Ridge,0.6283622223194871,43.710366150524905,68.20034858187658
+next_points,broader_g1_current,Full broader sensitivity set,RandomForest,0.6288024330157911,43.16292569433131,68.88403160915342

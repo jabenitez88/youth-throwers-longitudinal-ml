@@ -40,9 +40,9 @@ each index instance to windows containing at least two or at least three subsequ
 observations. Five-fold athlete-grouped cross-validation and the original fixed
 hyperparameters were retained. With at least two future observations, the cohort
 contained 737 instances from 185 athletes; gradient boosting with physical tests
-achieved R2 = 0.500, MAE = 54.94, and RMSE = 74.58. With at least three future
+achieved pooled OOF R2 = 0.560, MAE = 54.93, and RMSE = 75.12. With at least three future
 observations, 524 instances from 128 athletes remained; corresponding values were
-R2 = 0.526, MAE = 55.29, and RMSE = 70.71.
+R2 = 0.561, MAE = 55.25, and RMSE = 71.90.
 
 The paired gradient-boosting increment from physical tests did not persist in these
 restricted cohorts. Delta R2 was -0.015 (95% athlete-cluster bootstrap interval -0.062
@@ -207,3 +207,46 @@ from bootstrap uncertainty intervals, and corrected the Code Availability wordin
 Software versions and complete fixed hyperparameters are now reported. No grid
 search, randomized search, nested cross-validation, or post-comparison tuning was
 performed.
+
+## Second-review clarification: baseline status at the 900- and 950-point thresholds
+
+**Response.** We thank the reviewer for prompting this clarification. The threshold
+outcomes represented future performance level rather than incident first attainment,
+so athletes already at or above a threshold at baseline remained eligible. Of the
+289 athletes, 41 were at or above 900 points and 19 were at or above 950 points at
+baseline. Among the 79 `future_ge900` cases, 35 were already at or above 900 at
+baseline and 44 were below 900 before subsequently attaining the threshold. Among
+the 41 `future_ge950` cases, 18 were already at or above 950 and 23 attained it from
+below. We have clarified the outcome definition and added these counts to Results.
+
+## Second-review clarification: follow-up sensitivity Delta R2
+
+**Response.** We identified a presentation inconsistency. The R2 values previously
+shown in the sensitivity table were means of the five fold-specific R2 values,
+whereas the paired Delta R2 and its bootstrap interval were calculated from the two
+complete pooled out-of-fold prediction vectors. Thus, for the at-least-three cohort,
+0.526 - 0.545 = -0.019 describes the difference between fold means, while pooled
+OOF R2 was 0.561 with physical tests and 0.568 without them, yielding the reported
+paired Delta R2 of -0.007. For the at-least-two cohort, pooled OOF R2 was 0.560 with
+tests and 0.574 without them, yielding Delta R2 = -0.015. Neither model result was
+miscomputed, but combining the estimands in one table was confusing. We revised the
+table to report pooled OOF R2, MAE, and RMSE throughout, so that the displayed model
+values and paired Delta R2 are directly consistent. No model was refitted.
+
+## Second-review clarification: algorithms in the predictor-set comparison
+
+**Response.** We now identify the descriptively best algorithm in every row of the
+continuous-outcome predictor-set table. Selection was based on the highest mean
+five-fold cross-validated R2 among the three pre-specified candidates. In table
+order, the algorithms for `next_points` were Ridge, Ridge, Ridge, Random Forest,
+Random Forest, Ridge, and Random Forest. For `future_max_points`, they were Ridge,
+Ridge, Ridge, Ridge, Ridge, Gradient Boosting, and Ridge.
+
+## Second-review clarification: predictors in strict chronological validation
+
+**Response.** The same `g1_current` predictor set was used for all three strict
+chronological outcomes (`future_max_points`, `future_ge900`, and `future_ge950`). It
+comprised current competitive score, age, sex, age category, event, medicine-ball
+weight, competition-implement weight, backward overhead throw, vertical jump,
+standing long jump, and standing triple jump. We have added this information to the
+Methods and the chronological-validation table caption.
